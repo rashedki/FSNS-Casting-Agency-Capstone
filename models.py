@@ -52,3 +52,38 @@ class Movie(db.Model):
             'release_date': self.release_date,
             'actors': self.actors
         }
+
+# Creating an Actor class object to hold / update information about actors & actresses
+class Actor(db.Model):
+    # Setting the name of the table
+    __tablename__ = 'actors'
+
+    # Setting the attributes of the table
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String)
+
+    # Creating an insert function
+    def insert(self):
+        db.session.add(self)
+        db.session.commit(self)
+
+    # Creating an update function
+    def update(self):
+        db.session.commit()
+
+    # Creating a delete function
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    # Creating a formatting function
+    def format(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'age': self.age,
+            'gender': self.gender,
+            'movie_id': self.movie_id
+        }
