@@ -20,24 +20,35 @@ def setup_db(app, database_path=database_path):
     db.create_all()
 
 
-# '''
-# Person
-# Have title and release year
-# '''
-# class Person(db.Model):
-#     __tablename__ = 'People'
-#
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String)
-#     catchphrase = Column(String)
-#     bober = Column(Integer)
-#
-#     def __init__(self, name, catchphrase=""):
-#       self.name = name
-#       self.catchphrase = catchphrase
-#
-#     def format(self):
-#       return {
-#         'id': self.id,
-#         'name': self.name,
-#         'catchphrase': self.catchphrase}
+# Creating a Movies class object to hold / update information about movies
+class Movie(db.Model):
+    # Setting the name of the table
+    __tablename__ = 'movies'
+
+    # Setting attributes of the table
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String)
+    release_date = db.Column(db.Date)
+
+    # Creating an insert function
+    def insert(self):
+        db.session.add(self)
+        db.session.commit(self)
+
+    # Creating an update function
+    def update(self):
+        db.session.commit()
+
+    # Creating a delete function
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    # Creating a formatting function
+    def format(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'release_date': self.release_date,
+            'actors': self.actors
+        }
