@@ -30,6 +30,9 @@ class Movie(db.Model):
     title = db.Column(db.String)
     release_date = db.Column(db.Date)
 
+    # Connecting actors from the 'actors' table to the respective movie
+    actors = db.relationship('Actor', backref = 'movies')
+
     # Creating an insert function
     def insert(self):
         db.session.add(self)
@@ -63,6 +66,9 @@ class Actor(db.Model):
     name = db.Column(db.String)
     age = db.Column(db.Integer)
     gender = db.Column(db.String)
+
+    # Connecting movie to the respective actors from the movies table
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable = False)
 
     # Creating an insert function
     def insert(self):
