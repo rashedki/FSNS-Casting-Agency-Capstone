@@ -78,7 +78,7 @@ def check_permissions(permission, payload):
      # If all checks out from above, return true
     return True
     #(note note note check the following line)
-    raise Exception('Not Implemented')
+    # raise Exception('Not Implemented')
 
 # Defining a function to check that the provided token matches what is expected from Auth0
 def verify_decode_jwt(token):
