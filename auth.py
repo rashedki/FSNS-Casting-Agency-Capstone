@@ -149,16 +149,16 @@ def verify_decode_jwt(token):
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
-        def wrapper(*args, **kwargs):
-            token = get_token_auth_header()
+        def wrapper(*args, **kwargs):           
             try:
+                token = get_token_auth_header()
                 payload = verify_decode_jwt(token)
+                check_permissions(permission, payload)
             except:
                 raise AuthError({
                     'code': 'invalid_token',
                     'description': 'Token could not be verified.'
                 }, 401)
-            check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
