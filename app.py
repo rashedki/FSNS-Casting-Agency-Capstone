@@ -259,6 +259,69 @@ def create_app(test_config=None):
       else:
           abort(404)
 
+  # -------------------------------------------------------------------------
+  # Error Handling
+  '''
+    implement error handlers using the @app.errorhandler(error) decorator
+  '''
+
+  @app.errorhandler(500)
+  def internal_server_error(error):
+      return (jsonify({
+        'success': False, 
+        'error': 500,
+        'message': 'internal server error'
+      }), 500)
+
+  @app.errorhandler(400)
+  def bad_request(error):
+      return (jsonify({
+        'success': False, 
+        'error': 400,
+        'message': 'Bad Request'
+      }), 400)
+
+  @app.errorhandler(401)
+  def unauthorized(error):
+      return (jsonify({
+        'success': False, 
+        'error': 401,
+        'message': 'Unauthorized'
+      }), 401)
+
+  @app.errorhandler(404)
+  def not_found(error):
+      return jsonify({
+          "success": False,
+          "error": 404,
+          "message": "resource not found"
+      }), 404)
+
+  @app.errorhandler(405)
+  def not_allowed(error):
+      return (jsonify({
+        'success': False, 
+        'error': 405,
+        'message': 'method not allowed'
+      }), 405)
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          "success": False,
+          "error": 422,
+          "message": "unprocessable"
+      }), 422)
+
+  @app.errorhandler(AuthError)
+  def handle_auth_errors(auth_error):
+      return jsonify({
+          'success': False,
+          'error': auth_error.status_code,
+          'message': auth_error.error['description']
+      }), auth_error.status_code)
+
+
   return app
 
 APP = create_app()
