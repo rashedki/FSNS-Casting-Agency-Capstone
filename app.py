@@ -22,7 +22,7 @@ def create_app(test_config=None):
       # Querying all the movies
       movies = Movie.query.all()
 
-      # Ensuring results are returned else throwing error
+      # Ensuring results are returned otherwise throwing error
       if not movies:
         abort(404)
 
@@ -36,6 +36,26 @@ def create_app(test_config=None):
       return jsonify({
         'success': True,
         'movies': movies
+      })
+
+  # Creating an endpoint to view actor information
+  @app.route('/actors', methods = ['GET'])
+  @requires_auth('view:actors')
+  def get_actors():
+      # Querying all the actors
+      actors = Actor.query.all()
+
+      # Ensuring results are returned else giving error
+      if not actors:
+        abort(404)
+
+      # Formatting the return actor results
+      actors = [actor.format() for actor in actors]
+
+      # Returning actor information
+      return jsonify({
+          'success': True,
+          'actors': actors
       })
 
   return app
