@@ -69,7 +69,10 @@ class Actor(db.Model):
 
     # Connecting movie to the respective actors from the movies table
     movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable = False)
-
+    
+    # To access the actor list of movies
+    movies = db.relationship('Movie', backref = 'actors')
+    
     # Creating an insert function
     def insert(self):
         db.session.add(self)
