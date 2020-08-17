@@ -18,7 +18,7 @@ def create_app(test_config=None):
   # GET Endpoints
   # Creating an endpoint to view movie information
   @app.route('/movies', methods = ['GET'])
-  @requires_auth('view:movies')
+  @requires_auth('get:movies')
   def get_movies():
       # Querying all the movies
       movies = Movie.query.all()
@@ -41,7 +41,7 @@ def create_app(test_config=None):
 
   # Creating an endpoint to view actor information
   @app.route('/actors', methods = ['GET'])
-  @requires_auth('view:actors')
+  @requires_auth('get:actors')
   def get_actors():
       # Querying all the actors
       actors = Actor.query.all()
@@ -61,8 +61,8 @@ def create_app(test_config=None):
   
   # Creating an endpoint to allow a new movie to be added
   @app.route('/movies', methods = ['POST'])
-  @requires_auth('add:movies')
-  def add_movie():
+  @requires_auth('post:movies')
+  def add_movie(payload):
       # Getting information from request body
       body = request.get_json()
 
@@ -84,6 +84,42 @@ def create_app(test_config=None):
               'success': True,
               'movie_id': movie.id,
               'movies': [movie.format()],
+          })
+      except:
+          abort(422)
+
+  # Creating an endpoint to allow a new actor to be added
+  @app.route('/actors', methods = ['POST'])
+  @requires_auth('post:actors')
+  def add_actor(payload):
+      # Getting information from request body
+      body = request.get_json()
+
+      # Extracting information from the body
+      actor_name = body.get('name')
+      actor_age = body.get('age')
+      actor_gender = body.get('gender')
+      actor_movie_id = body.get('movie_id')
+
+      # Checking to see if proper info is present
+      if not 'name' in body:
+        abort(422)
+      # if not ('name' in body and 'age' in body and 'gender' in body and 'movie_id' in body):
+      #     abort(422)
+
+      try:
+          # Adding new actor object with request body info
+          actor = Actor(name = actor_name,
+                        age = actor_age,
+                        gender = actor_gender,
+                        movie_id = actor_movie_id)
+          actor.insert()
+
+          # Returning success information
+          return jsonify({
+              'success': True,
+              'actor_id': actor.id,
+              'actors': [actor.format()]
           })
       except:
           abort(422)
