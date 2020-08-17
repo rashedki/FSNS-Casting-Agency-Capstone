@@ -124,6 +124,55 @@ def create_app(test_config=None):
       except:
           abort(422)
 
+  # -------------------------------------------------------------------------
+  # DELETE Endpoints
+
+  # Creating endpoint to delete a movie by provided movie_id
+  @app.route('/movies/<int:movie_id', methods = ['DELETE'])
+  @requires_auth('delete:movies')
+  def delete_movie(payload, movie_id):
+      # Querying movie by provided movie_id
+      movie = Movie.query.filter(Movie.id == movie_id)
+      movie_availability = movie.one_or_none()
+
+      if movie_availability is None:
+        abort(404)
+
+      try:
+          # Deleting movie from database
+          movie.delete()
+
+          # Returning success information
+          return jsonify({
+              'success': True,
+              'deleted': movie_id
+          })
+      except:
+          abort(422)
+
+  # Creating endpoint to delete an actor by provided actor_id
+  @app.route('/actors/<int:actor_id', methods = ['DELETE'])
+  @requires_auth('delete:actors')
+  def delete_actor(payload, actor_id):
+      # Querying movie by provided movie_id
+      actor = Actor.query.filter(Actor.id == actor_id)
+      actor_availability = actor.one_or_none()
+
+      if actor_availabilityis None:
+        abort(404)
+
+      try:
+          # Deleting movie from database
+          actor.delete()
+
+          # Returning success information
+          return jsonify({
+              'success': True,
+              'deleted': actor_id
+          })
+      except:
+          abort(422)
+
   return app
 
 APP = create_app()
