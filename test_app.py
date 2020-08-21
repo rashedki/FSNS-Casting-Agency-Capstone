@@ -275,6 +275,116 @@ class CapstoneTestCase(unittest.TestCase):
         # success should be false
         self.assertFalse(data['success'])
 
+    # PATCH (Update) Endpoint Tests
+    # -------------------------------------------------------------------------
+    # Creating a test to update a movie with new info
+    def test_patch_movie(self):
+        '''
+        tests patching a movie
+        '''
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.patch(
+            f'/movies/{movie.id}', headers=director_headers, json={
+                'title': 'updated movie name'
+            })
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        # movies should be present in data
+        self.assertIn('movies', data)
+        # movies length should be more than 0
+        self.assertGreater(len(data['movies']), 0)
+
+    def test_unauthorised_patch_movie(self):
+        '''
+        tests patching new movie with a role below the minimum role
+        '''
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.patch(
+            f'/movies/{movie.id}', headers=assistant_headers, json={
+                'title': 'updated movie'
+            })
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
+
+    def test_empty_patch_movie(self):
+        '''
+        tests patching a movie with empty json
+        '''
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.patch(
+            f'/movies/{movie.id}', headers=director_headers, json={})
+        data = json.loads(response.data)
+        # status code should be 400
+        self.assertEqual(response.status_code, 400)
+        # success should be false
+        self.assertFalse(data['success'])
+
+    def test_patch_actor(self):
+        '''
+        tests patching an actor
+        '''
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.patch(
+            f'/actors/{actor.id}', headers=director_headers, json={
+                'name': 'updated actor name'
+            })
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        # actors should be present in data
+        self.assertIn('actors', data)
+        # actors length should be more than 0
+        self.assertGreater(len(data['actors']), 0)
+
+    def test_unauthorised_patch_actor(self):
+        '''
+        tests patching new actor with a role below the minimum role
+        '''
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.patch(
+            f'/actors/{actor.id}', headers=assistant_headers, json={
+                'name': 'updated actor'
+            })
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
+
+    def test_empty_patch_actor(self):
+        '''
+        tests patching an actor with empty json
+        '''
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.patch(
+            f'/actors/{actor.id}', headers=director_headers, json={})
+        data = json.loads(response.data)
+        # status code should be 400
+        self.assertEqual(response.status_code, 400)
+        # success should be false
+        self.assertFalse(data['success'])
+
+
     # DELETE Endpoint Tests
     # -------------------------------------------------------------------------
     # Creating a test to delete a movie using the DELETE endpoint
