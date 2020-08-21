@@ -175,122 +175,107 @@ class CapstoneTestCase(unittest.TestCase):
     # Creating a test for the /movies/create POST endpoint
     def test_post_movie(self):
         # Posting dummy movie data to movies POST endpoint
-        res = self.client().post('/movies/2', json = self.test_movie)
+        res = self.client().post('/movies', headers=producer_headers,
+                                    json={
+                                        'title': 'test posting new movie',
+                                        'release_date': '01-10-2021',
+                                        'gender': 'M'
+                                    })
         # Transforming body response into JSON
         data = json.loads(res.data)
-
         # Asserting that tests are valid
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['movie_id'])
+        # movies should be present in data
+        self.assertIn('movies', data)
+
+    def test_empty_post_movie(self):
+        '''
+        tests posting an empty movie json
+        '''
+        # get response json, then load the data
+        response = self.client.post('/movies',
+                                    headers=producer_headers,
+                                    json={})
+        data = json.loads(response.data)
+        # status code should be 400
+        self.assertEqual(response.status_code, 400)
+        # success should be false
+        self.assertFalse(data['success'])
+
+    def test_unauthorised_post_movie(self):
+        '''
+        tests posting new movie with a role below the minimum role
+        '''
+        # get response json, then load the data
+        response = self.client.post('/movies',
+                                    headers=director_headers,
+                                    json={
+                                        'title': 'test movie from unuathorized',
+                                        'release_date': '01-01-2022'
+                                    })
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
 
     # Creating a test for the /actors/create POST endpoint
     def test_post_actor(self):
-        # Posting dummy actor data to movies POST endpoint
-        res = self.client().post('/actors/2', json = self.test_actor)
-        # Transforming body response into JSON
-        data = json.loads(res.data)
+        '''
+        tests posting a new actor
+        '''
+        # get response json, then load the data
+        response = self.client.post('/actors',
+                                    headers=director_headers,
+                                    json={
+                                        'name': 'test artist from authorized',
+                                        'age': '42',
+                                        'gender': 'M'
+                                    })
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        # actors should be present in data
+        self.assertIn('actors', data)
+        # actors length should be more than 0
+        self.assertGreater(len(data['actors']), 0)
 
-        # Asserting that tests are valid
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['actor_id'])
+    def test_empty_post_actor(self):
+        '''
+        tests posting an empty actor json
+        '''
+        # get response json, then load the data
+        response = self.client.post('/actors',
+                                    headers=director_headers,
+                                    json={})
+        data = json.loads(response.data)
+        # status code should be 400
+        self.assertEqual(response.status_code, 400)
+        # success should be false
+        self.assertFalse(data['success'])
 
-    def test_404_sent_requestiong_beyond_valid_page(self):
-        res = self.client().get('/questions?page=1000')
-        data = json.loads(res.data)
+    def test_unauthorised_post_actor(self):
+        '''
+        tests posting new actor with a role below the minimum role
+        '''
+        # get response json, then load the data
+        response = self.client.post('/actors',
+                                    headers=assistant_headers,
+                                    json={
+                                        'name': 'test artist from unauthorized',
+                                        'age': '42',
+                                        'gender': 'M'
+                                    })
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
 
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'resource not found')
-
-    def test_delete_question(self):
-        res = self.client().delete('/questions/10')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 10)
-
-    def test_422_if_question_does_not_exist(self):
-        res = self.client().delete('/questions/1000')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 422)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'unprocessable')
-
-    def test_create_new_question(self):
-        res = self.client().post('/questions', json=self.new_question)
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['created'])
-
-    def test_400_if_question_creation_not_allowed(self):
-        res = self.client().post('/questions/45', json=self.new_question)
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 405)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'method not allowed')
-
-    def test_search_question(self):
-        res = self.client().post('/questions/search', json={"searchTerm": "k"})
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['total_questions'])
-        self.assertTrue(len(data['questions']))
-
-    def test_search_not_exist_question_(self):
-        res = self.client().post('/questions/search',
-                                 json={"searchTerm": "axasdad"})
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['total_questions'], 0)
-        self.assertFalse(len(data['questions']))
-
-    def test_get_questions_by_category(self):
-        res = self.client().get('/categories/1/questions')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['total_questions'])
-        self.assertTrue(len(data['questions']))
-
-    def test_404_get_question_by_not_exist_category(self):
-        res = self.client().get('/categories/1000/questions')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'resource not found')
-
-    def test_quizzes(self):
-        res = self.client().post('/quizzes',
-        json={"previous_questions": [],
-               "quiz_category": {"type": "Science",
-               "id": 1
-              }})
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertIsNotNone(data['question'])
-
-    def test_422_no_data_given_quizzes(self):
-        res = self.client().post('/quizzes')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 422)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'unprocessable')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
