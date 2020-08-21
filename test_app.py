@@ -171,7 +171,6 @@ class CapstoneTestCase(unittest.TestCase):
 
     # POST Endpoint Tests
     # -------------------------------------------------------------------------
-
     # Creating a test for the /movies/create POST endpoint
     def test_post_movie(self):
         # Posting dummy movie data to movies POST endpoint
@@ -275,6 +274,76 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
         # success should be false
         self.assertFalse(data['success'])
+
+    # DELETE Endpoint Tests
+    # -------------------------------------------------------------------------
+    # Creating a test to delete a movie using the DELETE endpoint
+    def test_delete_movie(self):
+        '''
+        tests deleting a movie
+        '''
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.delete(
+            f'/movies/{movie.id}', headers=producer_headers)
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        print(data)
+        # delete should be present in data
+        self.assertIn('delete', data)
+
+    def test_unauthorised_delete_movie(self):
+        '''
+        tests deleting a movie with a role.
+        '''
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.delete(
+            f'/movies/{movie.id}', headers=director_headers)
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
+
+    def test_delete_actor(self):
+        '''
+        tests deleting an actor
+        '''
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.delete(
+            f'/actors/{actor.id}', headers=director_headers)
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        print(data)
+        # delete should be present in data
+        self.assertIn('delete', data)
+
+    def test_unauthorised_delete_actor(self):
+        '''
+        tests deleting an actor with a role.
+        '''
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.delete(
+            f'/actors/{actor.id}', headers=assistant_headers)
+        data = json.loads(response.data)
+        # status code should be 403
+        self.assertEqual(response.status_code, 403)
+        # success should be false
+        self.assertFalse(data['success'])
+
 
 
 # Make the tests conveniently executable
