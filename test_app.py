@@ -5,9 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from app import create_app
 from models import *
 
-executive_producer_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1EZEdNMFpCTURFeU16WkZNems0UWtFMFJUZzNRak16UkVFMlJqQXdNVVpCT1RKQk5EYzROUSJ9.eyJpc3MiOiJodHRwczovL2lmYXRpbWFoLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZTI4ZWI0MGY4ZjU1YTBlYWFhOTVmZjkiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU4MDUyNjg0OCwiZXhwIjoxNTgzMTE4ODQ4LCJhenAiOiJmanlKaFd3MDZBTVdUN3MzWnp0cU1GMzhkc0g5dU94cyIsImd0eSI6InBhc3N3b3JkIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9yIiwiZGVsZXRlOm1vdmllIiwiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiLCJwb3N0OmFjdG9yIiwicG9zdDptb3ZpZSIsInVwZGF0ZTphY3RvciIsInVwZGF0ZTptb3ZpZSJdfQ.ZDOj8k8nZ0NdmrS-6xU3rBSEAPmqtedHIxI_u4B6Z7TwrisH68lCm_poE3BbSCjtgc0-26g2yxYjXwJBbj1eYGkGfvFxw9W4Aab4L0U3odp3VVBoh8QCHaeXxvXx0aK1sltoZLV-U14STVhd2kaEMigMeeVW1W7set7dFb17KwMfh2yt68ukUusGUCMh34upD2E0-sjFRerXDIjXJfNnrDGS5L4g6BbfTSAwy_dSuajZQaGuCYQU-DKBo0SUhUebAXQTqoUSf2wctq6ttQdRbtYAkCw5E8xgLmtpo_LiJpBkVbluy94qfASQlIUjTcrizAy44btgbfJVYIGiuYOIgQ'}
-casting_director_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1EZEdNMFpCTURFeU16WkZNems0UWtFMFJUZzNRak16UkVFMlJqQXdNVVpCT1RKQk5EYzROUSJ9.eyJpc3MiOiJodHRwczovL2lmYXRpbWFoLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZTI5MDExZjJmNWNjODBlOTg2Y2ZkOTUiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU4MDUzMTUxOSwiZXhwIjoxNTgzMTIzNTE5LCJhenAiOiJmanlKaFd3MDZBTVdUN3MzWnp0cU1GMzhkc0g5dU94cyIsImd0eSI6InBhc3N3b3JkIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9yIiwiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiLCJwb3N0OmFjdG9yIiwidXBkYXRlOmFjdG9yIiwidXBkYXRlOm1vdmllIl19.krU8wi3-DOgVeAzPX4jXqsbXTE4XbEc3T5t67nzE56bF3DCJVFLA5nqDxPHCO1iQ6Vph_CWFvsb9WFXhfWIjYhyCq4e4XKuhtNTr3eQwYycweZsWdcQgTnx9PGRwNRUNHi3DKLBYD1M85zmYDpeDzIjjluXKNxLZ855dtQRv22YWkKHuWpQ6Islxdggs_qbbHnV1ojOGYnm5DZDHWhMBV3SPiYqxBJhI1E8PGNf_lNmOqzMOqzzvmvaZIDMLoVkIacruqs72Mo49X0RStNBFAGBboUSQT8mcVlQB0AQywpLvpZYw-LqsgMmKnonA4PhxFsM5sEOL1KsSd-8UydEHsw'}
-casting_assistant_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1EZEdNMFpCTURFeU16WkZNems0UWtFMFJUZzNRak16UkVFMlJqQXdNVVpCT1RKQk5EYzROUSJ9.eyJpc3MiOiJodHRwczovL2lmYXRpbWFoLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZTM0YzRiM2FhYTFmMDBlNjU1NDkyZjQiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU4MDUzMTU3MCwiZXhwIjoxNTgzMTIzNTcwLCJhenAiOiJmanlKaFd3MDZBTVdUN3MzWnp0cU1GMzhkc0g5dU94cyIsImd0eSI6InBhc3N3b3JkIiwicGVybWlzc2lvbnMiOlsiZ2V0OmFjdG9ycyIsImdldDptb3ZpZXMiXX0.eV8f45n2BNon5n7DgtdcUvvlEYguLyhLER7pdNwQi_A_oUogyGEcVTtoMMaJMNYAIInRfD8ovqJ91O33-BfQco6M23FhnydhJkz7xsrEJxB1XuX-fpIhglF1LPh5eTDnRJyTiKH6nmEFBPpDJVYrL5BY-T9LsNZe_2TluczlKh3boDIh0ShV2ekvdJFdQjJxgWVd8_LhOCXS1h8GuIY6LwCLx1vHJN7KZXuUVDTgSz82t_SbH6qOkD7ZKUFFNIlDAPKisYQtjaRUBH-IyMgWTu9PGV-6A-82vTtyy96JN_dt1i3FKKlheYc4dXepH1Odib5ATHCDybqgWd0rzoJU-A'}
+executive_producer_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciO'}
+casting_director_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGci'}
+casting_assistant_headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSU'}
 
 
 class CapstoneTestCase(unittest.TestCase):
@@ -72,8 +72,8 @@ class CapstoneTestCase(unittest.TestCase):
     # -------------------------------------------------------------------------
     # GET Endpoint Tests
     # Creating a test for the movies GET endpoint
-    def test_get_movies(self):
-        res = self.client().get('/movies')
+    def test_get_all_movies(self):
+        res = self.client().get('/movies', headers=assistant_header)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -82,16 +82,47 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertTrue(len(data['movies']))
 
     def test_get_movies_not_allowed(self):
-        res = self.client().get('/movies/1')
+        res = self.client().get('/movies')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 405)
         self.assertEqual(data['success'], False)
 
+    def test_get_movie_details(self):
+        # load a random movie from db
+        movie = Movie.query.order_by(func.random()).first()
+        # get response json, requesting the movie dynamically, then load the data
+        response = self.client.get(
+            f'/movies/{movie.id}', headers=assistant_headers)
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        # movies should be present in data
+        self.assertIn('movies', data)
+        # movies length should be more than 0
+        self.assertGreater(len(data['movies']), 0)
+
+    def test_get_envalid_movie(self):
+        '''
+        tests getting movies by envalid id
+        '''
+        # get the last movie from db
+        movie = Movie.query.order_by(desc(Movie.id)).first()
+        # get response json, then load the data
+        response = self.client.get(
+            f'/movies/{movie.id + 1}', headers=assistant_headers)
+        data = json.loads(response.data)
+        # status code should be 404
+        self.assertEqual(response.status_code, 404)
+        # success should be false
+        self.assertFalse(data['success'])
+
     # Creating a test for the acotrs GET endpoint
-    def test_get_actors(self):
+    def test_get_all_actors(self):
         # Retrieving information from endpoint
-        res = self.client().get('/actors')
+        res = self.client().get('/actors', header=assistant_header)
         # Transforming body response into JSON
         data = json.loads(res.data)
 
@@ -101,11 +132,42 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertTrue(data['actors'])
 
     def test_get_actors_not_allowed(self):
-        res = self.client().get('/actors/1')
+        res = self.client().get('/actors')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 405)
         self.assertEqual(data['success'], False)
+
+    def test_get_actor_details(self):
+        # load a random actor from db
+        actor = Actor.query.order_by(func.random()).first()
+        # get response json, requesting the actor dynamically, then load the data
+        response = self.client.get(
+            f'/actors/{actor.id}', headers=assistant_headers)
+        data = json.loads(response.data)
+        # status code should be 200
+        self.assertEqual(response.status_code, 200)
+        # success should be true
+        self.assertTrue(data['success'])
+        # actors should be present in data
+        self.assertIn('actors', data)
+        # actors length should be more than 0
+        self.assertGreater(len(data['actors']), 0)
+
+    def test_get_envalid_actor(self):
+        '''
+        tests getting actors by envalid id
+        '''
+        # get the last actor from db
+        actor = Actor.query.order_by(desc(Actor.id)).first()
+        # get response json, then load the data
+        response = self.client.get(
+            f'/actors/{actor.id + 1}', headers=assistant_headers)
+        data = json.loads(response.data)
+        # status code should be 404
+        self.assertEqual(response.status_code, 404)
+        # success should be false
+        self.assertFalse(data['success'])
 
     # POST Endpoint Tests
     # -------------------------------------------------------------------------
