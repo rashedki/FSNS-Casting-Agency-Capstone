@@ -18,7 +18,7 @@ class CapstoneTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app()
+        self.app = create_app(None)
         self.client = self.app.test_client
         self.database_name = "capstone_test"
         self.database_path = "postgresql://{}:{}@{}/{}".format('khalil','', 'localhost:5432', self.database_name)
@@ -147,35 +147,35 @@ class CapstoneTestCase(unittest.TestCase):
     #     self.assertEqual(res.status_code, 401)
     #     self.assertEqual(data['success'], False)
 
-    def test_get_actor_details(self):
-        # load a random actor from db
-        actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
-        response = self.client().get(f'/actors/{actor.id}', headers=casting_assistant)
-        data = json.loads(response.data)
-        # status code should be 200
-        self.assertEqual(response.status_code, 200)
-        # success should be true
-        self.assertTrue(data['success'])
-        # actors should be present in data
-        self.assertIn('actor', data)
-        # actors length should be more than 0
-        self.assertGreater(len(str(data['actor'])), 0)
+    # def test_get_actor_details(self):
+    #     # load a random actor from db
+    #     actor = Actor.query.order_by(func.random()).first()
+    #     # get response json, requesting the actor dynamically, then load the data
+    #     response = self.client().get(f'/actors/{actor.id}', headers=casting_assistant)
+    #     data = json.loads(response.data)
+    #     # status code should be 200
+    #     self.assertEqual(response.status_code, 200)
+    #     # success should be true
+    #     self.assertTrue(data['success'])
+    #     # actors should be present in data
+    #     self.assertIn('actor', data)
+    #     # actors length should be more than 0
+    #     self.assertGreater(len(str(data['actor'])), 0)
 
-    def test_get_invalid_actor(self):
-        '''
-        tests getting actors by invalid id
-        '''
-        # get the last actor from db
-        actor = Actor.query.order_by(desc(Actor.id)).first()
-        # get response json, then load the data
-        response = self.client().get(
-            f'/actors/{actor.id + 1}', headers=casting_assistant)
-        data = json.loads(response.data)
-        # status code should be 422
-        self.assertEqual(response.status_code, 422)
-        # success should be false
-        self.assertFalse(data['success'])
+    # def test_get_invalid_actor(self):
+    #     '''
+    #     tests getting actors by invalid id
+    #     '''
+    #     # get the last actor from db
+    #     actor = Actor.query.order_by(desc(Actor.id)).first()
+    #     # get response json, then load the data
+    #     response = self.client().get(
+    #         f'/actors/{actor.id + 1}', headers=casting_assistant)
+    #     data = json.loads(response.data)
+    #     # status code should be 422
+    #     self.assertEqual(response.status_code, 422)
+    #     # success should be false
+    #     self.assertFalse(data['success'])
 
     # POST Endpoint Tests
     # -------------------------------------------------------------------------
@@ -401,9 +401,9 @@ class CapstoneTestCase(unittest.TestCase):
         tests deleting a movie
         '''
         # load a random movie from db
-        # xmovie = Movie.query.order_by(func.random()).first()
+        movie = Movie.query.order_by(func.random()).first()
         # get response json, requesting the movie dynamically, then load the data
-        response = self.client().delete('/movies/1', headers=casting_executive_producer)
+        response = self.client().delete(f'/movies/{movie.id}', headers=casting_executive_producer)
         data = json.loads(response.data)
         print(data)
         # status code should be 200
