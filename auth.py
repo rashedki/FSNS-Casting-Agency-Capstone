@@ -1,6 +1,6 @@
 # Note: This file is pretty much a copy/paste from my Coffeeshop project
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -8,7 +8,7 @@ from urllib.request import urlopen
 # Defining Autho0 information
 AUTH0_DOMAIN = 'rashedki.us.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'casting'
+API_AUDIENCE = 'capstone'
 
 ## AuthError Exception
 '''
@@ -29,7 +29,7 @@ Defining function to obtain authorization token from request header
 def get_token_auth_header():
     '''Obtains access token from the Authoization header'''
      # Getting auth info from header
-    auth_header = request.headers['Authorization']
+    auth_header = request.headers.get('Authorization')
 
     # Checking to see if auth information is present, else raises 401 error
     if "Authorization" not in request.headers:
