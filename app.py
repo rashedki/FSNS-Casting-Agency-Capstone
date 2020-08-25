@@ -1,23 +1,24 @@
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import json
 from flask_cors import CORS
 from datetime import datetime
 
 #importing objects from other files in this repo.
 from auth import AuthError, requires_auth
-from models import *
+from models import setup_db, Movie, Actor, db, db_drop_and_create_all
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
     CORS(app, resources = {r"/api/": {"origins": "*"}})
+    setup_db(app)
 
     # CORS Headers
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,True')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE')
         return response
 
@@ -30,12 +31,16 @@ def create_app(test_config=None):
         if excited == 'true': greeting = greeting + "!!!!!"
         return greeting
 
+    @app.route('/logout')
+    def logout():
+        message = 'You are loged out, Thank you for your visit'
+        return message       
 
     # GET Endpoints
     # Creating an endpoint to view movie information
     @app.route('/movies', methods = ['GET'])
     @requires_auth('get:movies')
-    def get_movies():
+    def get_movies(jwt):
         # Querying all the movies
         movies = Movie.query.all()
 
@@ -46,19 +51,39 @@ def create_app(test_config=None):
         # Formatting the returned movie results
         movies = [movie.format() for movie in movies]
 
-        # Formatting the actors field within movies
-        for movie in movies:
-            movie['actor'] = [actor.format() for actor in movie['actors']]
+        # # Formatting the actors field within movies
+        # for movie in movies:
+        #     movie['actor'] = [actor.format() for actor in movie['actors']]
 
         return jsonify({
             'success': True,
             'movies': movies
         })
 
+    # Creating endpoint to get a specific movie by provided movie_id
+    @app.route('/movies/<int:movie_id>', methods = ['GET'])
+    @requires_auth('get:movie-details')
+    def details_movie(jwt, movie_id):
+        # Querying movie by provided movie_id
+        movie = Movie.query.filter(Movie.id == movie_id)
+        movie_availability = movie.one_or_none()
+
+        try:
+            if movie_availability is None:
+                abort(404)
+
+            # Returning success information
+            return jsonify({
+                'success': True,
+                'movie': movie_id
+            })
+        except:
+            abort(422)
+
     # Creating an endpoint to view actor information
     @app.route('/actors', methods = ['GET'])
     @requires_auth('get:actors')
-    def get_actors():
+    def get_actors(jwt):
         # Querying all the actors
         actors = Actor.query.all()
 
@@ -74,11 +99,31 @@ def create_app(test_config=None):
             'success': True,
             'actors': actors
         })
+
+    # Creating endpoint to get a specific actor by provided actor_id
+    @app.route('/actors/<int:actor_id>', methods = ['GET'])
+    @requires_auth('get:actor-details')
+    def details_actor(jwt, actor_id):
+        # Querying movie by provided actor_id
+        actor = Actor.query.filter(Actor.id == actor_id)
+        actor_availability = actor.one_or_none()
+
+        try:
+            if actor_availability is None:
+                abort(404)
+
+            # Returning success information
+            return jsonify({
+                'success': True,
+                'actor': actor_id
+            })
+        except:
+            abort(422)
     
     # Creating an endpoint to allow a new movie to be added
     @app.route('/movies', methods = ['POST'])
     @requires_auth('post:movies')
-    def add_movie(payload):
+    def add_movie(jwt):
         # Getting information from request body
         body = request.get_json()
 
@@ -87,12 +132,12 @@ def create_app(test_config=None):
         movie_release_date = body.get('release_date')
 
         # Checking to see if proper info is present
-        if None in (title and release_date):
+        if None in (movie_title, movie_release_date):
             abort(422)
 
         try:
             # Adding new movie object with request body info
-            movie = Movie(title = movie_title, release_date=datetime.strptime(movie_release_date, '%Y-%m-%d'))
+            movie = Movie(title = movie_title, release_date=movie_release_date)
             movie.insert()
 
             # Returning success information
@@ -107,7 +152,7 @@ def create_app(test_config=None):
     # Creating an endpoint to allow a new actor to be added
     @app.route('/actors', methods = ['POST'])
     @requires_auth('post:actors')
-    def add_actor(payload):
+    def add_actor(jwt):
         # Getting information from request body
         body = request.get_json()
 
@@ -136,7 +181,7 @@ def create_app(test_config=None):
                 'success': True,
                 'actor_id': actor.id,
                 'actors': [actor.format()]
-            })
+                })
         except:
             abort(422)
 
@@ -146,30 +191,33 @@ def create_app(test_config=None):
     # Creating endpoint to delete a movie by provided movie_id
     @app.route('/movies/<int:movie_id>', methods = ['DELETE'])
     @requires_auth('delete:movies')
-    def delete_movie(payload, movie_id):
-        # Querying movie by provided movie_id
-        movie = Movie.query.filter(Movie.id == movie_id)
-        movie_availability = movie.one_or_none()
-
-        if movie_availability is None:
-            abort(404)
-
+    def delete_movie(jwt, movie_id):
         try:
+            # Querying movie by provided movie_id
+            movie = Movie.query.filter(Movie.id == movie_id)
+            movie_availability = movie.one_or_none()
+
+            if movie_availability is None:
+                abort(404)
             # Deleting movie from database
+            # movie_id = movie.id
             movie.delete()
 
             # Returning success information
             return jsonify({
                 'success': True,
                 'deleted': movie_id
-            })
-        except:
+                })
+        # except:
+        #     abort(422)
+        except Exception as e:
+            print(e)
             abort(422)
 
     # Creating endpoint to delete an actor by provided actor_id
     @app.route('/actors/<int:actor_id>', methods = ['DELETE'])
     @requires_auth('delete:actors')
-    def delete_actor(payload, actor_id):
+    def delete_actor(jwt, actor_id):
         # Querying actor by provided actor_id
         actor = Actor.query.filter(Actor.id == actor_id)
         actor_availability = actor.one_or_none()
@@ -193,84 +241,91 @@ def create_app(test_config=None):
     # PATCH (Update) Endpoints
     # Creating an endpoint to update information about a specific movie
     @app.route('/movies/<int:movie_id>', methods = ['PATCH'])
-    @requires_auth('update:movies')
-    def update_movie(payload, movie_id):
-        # Querying movie by provided movie_id
-        movie = Movie.query.filter(Movie.id == movie_id)
-
-        # Checking to see if movie info is present
-        if movie:
-            try:
-                # Getting information from request body
-                body = request.get_json()
-
-                # Extracting information from body
-                title = body.get('title')
-                release_date = body.get('release_date')
-
-                # Updating movie information if new attribute information is present
-                if title in body:
-                    movie.title = title
-                if release_date in body:
-                    movie.release_date = datetime.strptime(body.get('release_date'), '%Y-%m-%d')
-
-                # Updating movie information formally in database
-                movie.update()
-
-                # Returning success information
-                return jsonify({
-                    'success': True,
-                    'movie_id': movie.id,
-                    'movies': [movie.format()]
-                })
+    @requires_auth('patch:movies')
+    def update_movie(jwt, movie_id):
+        try:
+            movie = Movie.query.get(movie_id)
+            if movie is None:
+                abort(404)
+            # get json from body
+            body = request.get_json()
+            # Raise a 400 error if the title or release_date are not strings, or empty
+            if 'title' not in body and 'release_date' not in body:
+                abort(400)
+            # update the title if it's available in the request body
+            if 'title' in body:
+                if not isinstance(body['title'], str):
+                    # title is not a string
+                    abort(400)
+                # update the movie's title
+                movie.title = body['title']
+            # update the release_date if it's available in the request body
+            if 'release_date' in body:
+                # check that the title is a string
+                if not isinstance(body['release_date'], str):
+                    # release_date is not a string
+                    abort(400)
+                # update the movie's release_date
+                movie.release_date = body['release_date']
+            # update the movie in the database
+            movie.update()
+            return jsonify({
+                'success': True,
+                'movies': [movie.format()]
+            })
             # Raising exception if error updating movie
-            except:
-                abort(422)
+        except:
+            abort(422)
         # Raising exception if movie could not be found
         else:
             abort(404)
 
+
     # Creating an endpoint to update actor information with new attribute info
     @app.route('/actors/<int:actor_id>', methods = ['PATCH'])
-    @requires_auth('update:actors')
-    def update_actors(actor_id):
-        # Querying actor by provided actor_id
-        actor = Actor.query.filter(Actor.id == actor_id)
-
-        # Checking to see if actor info is present
-        if actor:
-            try:
-                # Getting information from request body
-                body = request.get_json()
-
-                # Extracting information from body
-                name = body.get('name')
-                age = body.get('age')
-                gender = body.get('gender')
-                movie_id = body.get('movie_id')
-
-                # Updating actor information if new attribute information is present
-                if name:
-                    actor.name = name
-                if age:
-                    actor.age = age
-                if gender:
-                    actor.gender = gender
-                if movie_id:
-                    actor.movie_id = movie_id
-
-                # Updating actor information formally in database
-                actor.update()
-
-                # Returning success information
-                return jsonify({
-                    'success': True,
-                    'actor_id': actor.id,
-                    'actors': [actor.format()]
-                })
+    @requires_auth('patch:actors')
+    def update_actors(jwt, actor_id):
+        try:
+            actor = Actor.query.get(actor_id)
+            if actor is None:
+                abort(404)
+            # get json from body
+            body = request.get_json()
+            # Raise a 400 error if the name, age, and gender are not strings, or empty
+            if 'name' not in body and 'age' not in body and 'gender' not in body:
+                abort(400)
+            # update the age if it's available in the request body
+            if 'name' in body:
+                if not isinstance(body['name'], str):
+                    # name is not a string
+                    abort(400)
+                # update the actor's title
+                actor.name = body['name']
+            # update the age if it's available in the request body
+            if 'age' in body:
+                # check that the age is a string
+                if not isinstance(body['age'], str):
+                    # age is not a string
+                    abort(400)
+                # update the actor's age
+                actor.age = body['age']
+            # update the gender if it's available in the request body
+            if 'gender' in body:
+                # check that the gender is a string
+                if not isinstance(body['gender'], str):
+                    # gender is not a string
+                    abort(400)
+                # update the actor's gender
+                actor.gender = body['gender']
+            # update the actor in the database
+            actor.update()
+            return jsonify({
+                'success': True,
+                'actors': [actor.format()]
+            })
             # Raising exception if error updating actor
-            except:
-                abort(422)
+        except:
+            abort(422)
         # Raising exception if actor could not be found
         else:
             abort(404)
@@ -340,7 +395,7 @@ def create_app(test_config=None):
 
     return app
 
-APP = create_app()
+app = create_app()
 
 if __name__ == '__main__':
-    APP.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=True)
