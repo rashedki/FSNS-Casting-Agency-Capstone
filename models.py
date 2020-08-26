@@ -81,7 +81,7 @@ class Actor(db.Model):
     gender = db.Column(db.String)
 
     # Connecting movie to the respective actors from the movies table
-    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id', ondelete='SET NULL'), nullable=True)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=True)
     
     # # To access the actor list of movies
     # movies = db.relationship('Movie', backref = 'actors')
