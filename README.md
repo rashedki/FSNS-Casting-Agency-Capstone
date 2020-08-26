@@ -93,7 +93,7 @@ Adds a new movie to the db.
 Edit data on a movie in the db.
 
 
-###### DELETE /movies/<int:movie_id>
+######### DELETE /movies/<int:movie_id>
 
 Delete a movie from the db.
 
@@ -118,9 +118,9 @@ Edit data on a actor in the db.
 Delete a actor from the db.
 
 
-Tests
+### Tests
 
-To run the tests, run 
+To run the tests, run the follwoing script in your terminal:
 ```sh
 python3 test_app.py
 ```
