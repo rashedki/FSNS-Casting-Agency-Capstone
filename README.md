@@ -93,7 +93,7 @@ Adds a new movie to the db.
 Edit data on a movie in the db.
 
 
-###### ###### DELETE /movies/<int:movie_id>
+###### DELETE /movies/<int:movie_id>
 
 Delete a movie from the db.
 
