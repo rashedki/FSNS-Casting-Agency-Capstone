@@ -4,10 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 from flask_cors import CORS
 from datetime import datetime
-
 #importing objects from other files in this repo.
 from auth import AuthError, requires_auth
-from models import setup_db, Movie, Actor, db, db_drop_and_create_all
+from models import setup_db, Movie, Actor, db
 
 def create_app(test_config=None):
     # create and configure the app
@@ -65,20 +64,17 @@ def create_app(test_config=None):
     @requires_auth('get:movie-details')
     def details_movie(jwt, movie_id):
         # Querying movie by provided movie_id
-        movie = Movie.query.filter(Movie.id == movie_id)
-        movie_availability = movie.one_or_none()
-
-        try:
-            if movie_availability is None:
-                abort(404)
-
-            # Returning success information
+        movie = Movie.query.get(movie_id)
+        if movie is None:
+            abort(404)
+        else:
+            movie = movie.format()
             return jsonify({
                 'success': True,
-                'movie': movie_id
+                'movie': movie
             })
-        except:
-            abort(422)
+        # except:
+        #     abort(422)
 
     # Creating an endpoint to view actor information
     @app.route('/actors', methods = ['GET'])
@@ -126,11 +122,13 @@ def create_app(test_config=None):
     def add_movie(jwt):
         # Getting information from request body
         body = request.get_json()
+        print(body)
 
         # Extracting information from body.
         movie_title = body.get('title')
+        print(movie_title)
         movie_release_date = body.get('release_date')
-
+        print(movie_release_date)
         # Checking to see if proper info is present
         if None in (movie_title, movie_release_date):
             abort(422)
@@ -192,37 +190,102 @@ def create_app(test_config=None):
     @app.route('/movies/<int:movie_id>', methods = ['DELETE'])
     @requires_auth('delete:movies')
     def delete_movie(jwt, movie_id):
-        try:
-            # Querying movie by provided movie_id
-            movie = Movie.query.filter(Movie.id == movie_id)
-            movie_availability = movie.one_or_none()
+        movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
-            if movie_availability is None:
-                abort(404)
-            # Deleting movie from database
-            # movie_id = movie.id
-            movie.delete()
-
-            # Returning success information
-            return jsonify({
-                'success': True,
-                'deleted': movie_id
+        if movie is None:
+            abort(404)  # abort if id is not found
+        else:
+            try:
+                movie.delete()
+                # return movie id that was deleted
+                return jsonify({
+                    'success': True,
+                    'deleted': movie_id
                 })
+            except Exception:
+                abort(422)
+        # # Querying movie by provided movie_id
+        # movie = Movie.query.get(movie_id)
+        # if movie is None:
+        #     abort(404)
+        # else:
+        #     movie.delete()
+        #     return jsonify({
+        #         'success': True,
+        #         'movie': movie,
+        #         'movie id': movie_id
+        #     })
+
+        # # Querying movie by provided movie_id
+        # movie = Movie.query.filter_by(id=movie_id)
+        # movie_availability = movie.one_or_none()
+
+        # # if movie_availability is None:
+        # #     abort(404)
+        # # # Deleting movie from database
+        # # # movie_id = movie.id
+        # # else:
+        #     # deleted_movie_id = movie.id
+        # print(movie)
+        # movie.delete()
+       
+        # # Returning success information
+        # return jsonify({
+        #     'success': True,
+        #     'deleted': movie_id
+        #     })
+
+
+        # try:
+        #     # Querying movie by provided movie_id
+        #     movie = Movie.query.filter_by(id=movie_id)
+        #     movie_availability = movie.one_or_none()
+
+        #     if movie_availability is None:
+        #         abort(404)
+        #     # Deleting movie from database
+        #     # movie_id = movie.id
+        #     else:
+        #         deleted_movie_id = movie.id
+        #         movie.delete()
+        # except Exception:
+        #     abort(422)
+        # # Returning success information
+        # return jsonify({
+        #     'success': True,
+        #     'deleted': deleted_movie_id
+        #     })
+
+
         # except:
         #     abort(422)
-        except Exception as e:
-            print(e)
-            abort(422)
+        # except Exception as e:
+        #     print(e)
+        #     abort(422)
+        # try:
+        #     movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        #     # movie = Movie.query.filter(Movie.id == movie_id)
+        #     # movie_availability = movie.one_or_none()
+        #     if movie is None:
+        #         abort(404)
+        #     else:
+        #         deleted_movie_id = movie.id
+        #         movie.delete()
+        # except Exception:
+        #     abort(422)
+        # return jsonify({
+        #     'success': True,
+        #     'deleted_movie_id': deleted_movie_id
+        #     })
 
     # Creating endpoint to delete an actor by provided actor_id
     @app.route('/actors/<int:actor_id>', methods = ['DELETE'])
     @requires_auth('delete:actors')
     def delete_actor(jwt, actor_id):
         # Querying actor by provided actor_id
-        actor = Actor.query.filter(Actor.id == actor_id)
-        actor_availability = actor.one_or_none()
+        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
-        if actor_availability is None:
+        if actor is None:
             abort(404)
 
         try:
@@ -395,6 +458,7 @@ def create_app(test_config=None):
 
     return app
 
+# Creating the Flask application
 app = create_app()
 
 if __name__ == '__main__':
