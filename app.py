@@ -4,9 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 from flask_cors import CORS
 from datetime import datetime
-#importing objects from other files in this repo.
+# importing objects from other files in this repo.
 from auth import AuthError, requires_auth
 from models import setup_db, Movie, Actor, db
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -42,18 +43,12 @@ def create_app(test_config=None):
     def get_movies(jwt):
         # Querying all the movies
         movies = Movie.query.all()
-
         # Ensuring results are returned otherwise throwing error
         if not movies:
             abort(404)
-
         # Formatting the returned movie results
         movies = [movie.format() for movie in movies]
-
         # # Formatting the actors field within movies
-        # for movie in movies:
-        #     movie['actor'] = [actor.format() for actor in movie['actors']]
-
         return jsonify({
             'success': True,
             'movies': movies
@@ -82,14 +77,11 @@ def create_app(test_config=None):
     def get_actors(jwt):
         # Querying all the actors
         actors = Actor.query.all()
-
         # Ensuring results are returned else giving error
         if not actors:
             abort(404)
-
         # Formatting the return actor results
         actors = [actor.format() for actor in actors]
-
         # Returning actor information
         return jsonify({
             'success': True,
@@ -103,11 +95,9 @@ def create_app(test_config=None):
         # Querying movie by provided actor_id
         actor = Actor.query.filter(Actor.id == actor_id)
         actor_availability = actor.one_or_none()
-
         try:
             if actor_availability is None:
                 abort(404)
-
             # Returning success information
             return jsonify({
                 'success': True,
@@ -122,22 +112,16 @@ def create_app(test_config=None):
     def add_movie(jwt):
         # Getting information from request body
         body = request.get_json()
-        print(body)
-
         # Extracting information from body.
         movie_title = body.get('title')
-        print(movie_title)
         movie_release_date = body.get('release_date')
-        print(movie_release_date)
         # Checking to see if proper info is present
         if None in (movie_title, movie_release_date):
             abort(422)
-
         try:
             # Adding new movie object with request body info
             movie = Movie(title = movie_title, release_date=movie_release_date)
             movie.insert()
-
             # Returning success information
             return jsonify({
                 'success': True,
@@ -153,19 +137,14 @@ def create_app(test_config=None):
     def add_actor(jwt):
         # Getting information from request body
         body = request.get_json()
-
         # Extracting information from the body
         actor_name = body.get('name')
         actor_age = body.get('age')
         actor_gender = body.get('gender')
         actor_movie_id = body.get('movie_id')
-
         # Checking to see if proper info is present
         if not 'name' in body:
             abort(422)
-        # if not ('name' in body and 'age' in body and 'gender' in body and 'movie_id' in body):
-        #     abort(422)
-
         try:
             # Adding new actor object with request body info
             actor = Actor(name = actor_name,
@@ -173,7 +152,6 @@ def create_app(test_config=None):
                             gender = actor_gender,
                             movie_id = actor_movie_id)
             actor.insert()
-
             # Returning success information
             return jsonify({
                 'success': True,
@@ -185,13 +163,11 @@ def create_app(test_config=None):
 
     # -------------------------------------------------------------------------
     # DELETE Endpoints
-
     # Creating endpoint to delete a movie by provided movie_id
     @app.route('/movies/<int:movie_id>', methods = ['DELETE'])
     @requires_auth('delete:movies')
     def delete_movie(jwt, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
-
         if movie is None:
             abort(404)  # abort if id is not found
         else:
@@ -204,79 +180,6 @@ def create_app(test_config=None):
                 })
             except Exception:
                 abort(422)
-        # # Querying movie by provided movie_id
-        # movie = Movie.query.get(movie_id)
-        # if movie is None:
-        #     abort(404)
-        # else:
-        #     movie.delete()
-        #     return jsonify({
-        #         'success': True,
-        #         'movie': movie,
-        #         'movie id': movie_id
-        #     })
-
-        # # Querying movie by provided movie_id
-        # movie = Movie.query.filter_by(id=movie_id)
-        # movie_availability = movie.one_or_none()
-
-        # # if movie_availability is None:
-        # #     abort(404)
-        # # # Deleting movie from database
-        # # # movie_id = movie.id
-        # # else:
-        #     # deleted_movie_id = movie.id
-        # print(movie)
-        # movie.delete()
-       
-        # # Returning success information
-        # return jsonify({
-        #     'success': True,
-        #     'deleted': movie_id
-        #     })
-
-
-        # try:
-        #     # Querying movie by provided movie_id
-        #     movie = Movie.query.filter_by(id=movie_id)
-        #     movie_availability = movie.one_or_none()
-
-        #     if movie_availability is None:
-        #         abort(404)
-        #     # Deleting movie from database
-        #     # movie_id = movie.id
-        #     else:
-        #         deleted_movie_id = movie.id
-        #         movie.delete()
-        # except Exception:
-        #     abort(422)
-        # # Returning success information
-        # return jsonify({
-        #     'success': True,
-        #     'deleted': deleted_movie_id
-        #     })
-
-
-        # except:
-        #     abort(422)
-        # except Exception as e:
-        #     print(e)
-        #     abort(422)
-        # try:
-        #     movie = Movie.query.filter_by(id=movie_id).one_or_none()
-        #     # movie = Movie.query.filter(Movie.id == movie_id)
-        #     # movie_availability = movie.one_or_none()
-        #     if movie is None:
-        #         abort(404)
-        #     else:
-        #         deleted_movie_id = movie.id
-        #         movie.delete()
-        # except Exception:
-        #     abort(422)
-        # return jsonify({
-        #     'success': True,
-        #     'deleted_movie_id': deleted_movie_id
-        #     })
 
     # Creating endpoint to delete an actor by provided actor_id
     @app.route('/actors/<int:actor_id>', methods = ['DELETE'])
@@ -284,14 +187,11 @@ def create_app(test_config=None):
     def delete_actor(jwt, actor_id):
         # Querying actor by provided actor_id
         actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
-
         if actor is None:
             abort(404)
-
         try:
             # Deleting actor from database
             actor.delete()
-
             # Returning success information
             return jsonify({
                 'success': True,
@@ -343,7 +243,6 @@ def create_app(test_config=None):
         else:
             abort(404)
 
-
     # Creating an endpoint to update actor information with new attribute info
     @app.route('/actors/<int:actor_id>', methods = ['PATCH'])
     @requires_auth('patch:actors')
@@ -386,7 +285,7 @@ def create_app(test_config=None):
                 'success': True,
                 'actors': [actor.format()]
             })
-            # Raising exception if error updating actor
+        # Raising exception if error updating actor
         except:
             abort(422)
         # Raising exception if actor could not be found
@@ -398,7 +297,6 @@ def create_app(test_config=None):
     '''
         implement error handlers using the @app.errorhandler(error) decorator
     '''
-
     @app.errorhandler(500)
     def internal_server_error(error):
         return (jsonify({
@@ -454,7 +352,6 @@ def create_app(test_config=None):
             'error': auth_error.status_code,
             'message': auth_error.error['description']
         }), auth_error.status_code)
-
 
     return app
 
