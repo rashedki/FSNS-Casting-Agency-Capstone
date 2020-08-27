@@ -69,12 +69,6 @@ class CapstoneTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
 
-            # movie1 = Movie(
-            #     title='The Testing Test',
-            #     release_date='01-09-2020'
-            # )
-            # movie1.insert()
-
     def tearDown(self):
         """Executed after reach test"""
         pass
