@@ -14,12 +14,15 @@ db = SQLAlchemy()
 setup_db(app)
     binds a flask application and a SQLAlchemy service
 '''
+
+
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
     db.create_all()
+
 
 '''
 db_drop_and_create_all()
@@ -34,18 +37,19 @@ def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
 
+
 # Creating a Movies class object to hold / update information about movies
 class Movie(db.Model):
     # Setting the name of the table
     __tablename__ = 'movies'
 
     # Setting attributes of the table
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
     release_date = db.Column(db.Date)
 
     # Connecting actors from the 'actors' table to the respective movie
-    actors = db.relationship('Actor', backref = 'movies')
+    actors = db.relationship('Actor', backref='movies')
 
     # Creating an insert function
     def insert(self):
@@ -69,23 +73,25 @@ class Movie(db.Model):
             'release_date': self.release_date,
         }
 
-# Creating an Actor class object to hold / update information about actors & actresses
+
+# Creating an Actor class object to hold or update information
+# about actors & actresses
 class Actor(db.Model):
     # Setting the name of the table
     __tablename__ = 'actors'
 
     # Setting the attributes of the table
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     age = db.Column(db.Integer)
     gender = db.Column(db.String)
 
     # Connecting movie to the respective actors from the movies table
     movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=True)
-    
+
     # # To access the actor list of movies
     # movies = db.relationship('Movie', backref = 'actors')
-    
+
     # Creating an insert function
     def insert(self):
         db.session.add(self)

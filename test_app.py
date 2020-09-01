@@ -1,4 +1,3 @@
-import os
 from os import environ
 import unittest
 import json
@@ -8,9 +7,12 @@ from models import *
 from auth import AuthError, requires_auth
 from sqlalchemy import func, desc
 
-casting_executive_producer = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjJqeXJtZEpnQ0VDTTBLTWp4d2o3MiJ9.eyJpc3MiOiJodHRwczovL3Jhc2hlZGtpLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjQzOTI5ZGIyMzAzMDAwNjcwNTQxZjYiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU5ODUzMzQwOSwiZXhwIjoxNTk4NTQwNjA5LCJhenAiOiI0R2dWanFnU2prNXo1YkZqR2tMeVRTMmhZUmQwV2hCRCIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9ycyIsImRlbGV0ZTptb3ZpZXMiLCJnZXQ6YWN0b3ItZGV0YWlscyIsImdldDphY3RvcnMiLCJnZXQ6bW92aWUtZGV0YWlscyIsImdldDptb3ZpZXMiLCJwYXRjaDphY3RvcnMiLCJwYXRjaDptb3ZpZXMiLCJwb3N0OmFjdG9ycyIsInBvc3Q6bW92aWVzIl19.dsQ8GhWHM6OBWso8h09Vut72SZHZMqxdi8SglHJYTkdqIR4qqDhI0Ly_BgvonFJgn9SFlQpYE69AtflQqvyGeR-CJJrzcKBbK8F9Ac6V88jqCSUqIkKS7i8e38y1Ys3jv_DO4pQGlYegyevaENjU_TgmEEHLgjNkdBBXuOuDY5NKcMG0avmOtqCdWPXBIIJEz0gmBr8s_BOxzIlUgpUI3F1KZsM5oX7OBVmljL1Hopi69nU5rr3zZLSAXp1y4P6NEcitsaWuJGa3z2zEn-qySdeQpLBXoRlZRJjWy1o399oGV9ujw1T7NIV3sLB19VnzHlmTHrnD6v6NOjHa_2Vlsw'}
-casting_director = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjJqeXJtZEpnQ0VDTTBLTWp4d2o3MiJ9.eyJpc3MiOiJodHRwczovL3Jhc2hlZGtpLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjQzYTQ1ZDhmMThhYTAwNjg5ZTFlYmYiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU5ODUzMzMzOSwiZXhwIjoxNTk4NTQwNTM5LCJhenAiOiI0R2dWanFnU2prNXo1YkZqR2tMeVRTMmhZUmQwV2hCRCIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFjdG9ycyIsImdldDphY3Rvci1kZXRhaWxzIiwiZ2V0OmFjdG9ycyIsImdldDptb3ZpZS1kZXRhaWxzIiwiZ2V0Om1vdmllcyIsInBhdGNoOmFjdG9ycyIsInBhdGNoOm1vdmllcyIsInBvc3Q6YWN0b3JzIl19.hDUPEpFVq7DtzMVNUY8qBSAiltJ8YedAOtTpnOiLkkPAIOjlLKY9xrEkLbIRMGH7c3SDIlB4NcZRXdK_M4VvTFEXid76mxQS49aybr4RuMBDSRNWjkxHn3nqk32MJV3ITWpRmy4DUDrCuMh5jBRrKVOOOTrB_TmHK2NRKw3CyDnHi18GcuX5z3Zlv_f4lBdXG3ns2rxcqKlda8OLE_26fT72HVAtETeyGGKFfxCD_V2aNXeXnHn7fLn3zZb4adQAPzmjpO-BbJIfNWi4wKCKOlZkNKkYlCe0ZYPWNXmGfKNbtKfsEFV0WZOKIdwbgePmI-9j6ch0DXVqiWAgV7ELbw'}
-casting_assistant = {'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjJqeXJtZEpnQ0VDTTBLTWp4d2o3MiJ9.eyJpc3MiOiJodHRwczovL3Jhc2hlZGtpLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjQyMzMyN2ExYjQxZjAwNjc4MjE3ZDEiLCJhdWQiOiJjYXBzdG9uZSIsImlhdCI6MTU5ODUzMzIyOCwiZXhwIjoxNTk4NTQwNDI4LCJhenAiOiI0R2dWanFnU2prNXo1YkZqR2tMeVRTMmhZUmQwV2hCRCIsInNjb3BlIjoiIiwicGVybWlzc2lvbnMiOlsiZ2V0OmFjdG9yLWRldGFpbHMiLCJnZXQ6YWN0b3JzIiwiZ2V0Om1vdmllLWRldGFpbHMiLCJnZXQ6bW92aWVzIl19.kcE7Eou0Lra0IePyzxPXBlZL277ZVuPDZ8GxUs5ZflGewRsPb9EVv3kyRKOGXNQ52V_FXQl5VRm5J3QRQzloCEb2tl0xGNGjxBsPBWYWGeQOxkFewT-Rf4TnEKNTYVmOfNCC08b79m_F9cTbrwKjaZbjLEnshitnSiecV2Sne17uAXYdBMnW7PcVPKW1vg8zDEejt8q32RP9KNbH6wY-soFjleXjL_lqbDBhygfdVEVMYtSBenWVkN_FqbRhwwY5NaoIjui_7DSie1yWuJ2aLMH8JXPZHOzkhaNgUKbBbb-HL7AlVArYQsdhPTSdiIX-Kv2bnCcY2akiwkiK0JS1dA'}
+executive_token = os.environ.get('CASTING_EXECUTIVE_PRODUCER_TOKEN')
+casting_executive_producer = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + executive_token}
+director_token = os.environ.get('CASTING_DIRECTOR_TOKEN')
+casting_director = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + director_token}
+assistant_token = os.environ.get('CASTING_ASSISTANT_TOKEN')
+casting_assistant = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + assistant_token}
 
 
 class CapstoneTestCase(unittest.TestCase):
@@ -21,7 +23,8 @@ class CapstoneTestCase(unittest.TestCase):
         self.app = create_app(None)
         self.client = self.app.test_client
         self.database_name = "capstone_test"
-        self.database_path = "postgresql://{}:{}@{}/{}".format('khalil','', 'localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}:{}@{}/{}".\
+            format('khalil', '', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
         self.new_movie = {
@@ -73,10 +76,6 @@ class CapstoneTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    
-    # -------------------------------------------------------------------------
-    # GET Endpoint Tests
-    # Creating a test for the movies GET endpoint
     def test_get_all_movies(self):
         res = self.client().get('/movies', headers=casting_assistant)
         data = json.loads(res.data)
@@ -96,8 +95,10 @@ class CapstoneTestCase(unittest.TestCase):
     def test_get_movie_details(self):
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
-        response = self.client().get(f'/movies/{movie.id}', headers=casting_assistant)
+        # get response json, requesting the movie dynamically,
+        # then load the data
+        response = self.client().get(f'/movies/{movie.id}',
+                                     headers=casting_assistant)
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -115,7 +116,8 @@ class CapstoneTestCase(unittest.TestCase):
         # get the last movie from db
         movie = Movie.query.order_by(desc(Movie.id)).first()
         # get response json, then load the data
-        response = self.client().get(f'/movies/{movie.id + 1}', headers=casting_assistant)
+        response = self.client().get(f'/movies/{movie.id + 1}',
+                                     headers=casting_assistant)
         data = json.loads(response.data)
         # status code should be 404
         self.assertEqual(response.status_code, 404)
@@ -144,8 +146,10 @@ class CapstoneTestCase(unittest.TestCase):
     def test_get_actor_details(self):
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
-        response = self.client().get(f'/actors/{actor.id}', headers=casting_assistant)
+        # get response json, requesting the actor dynamically,
+        # then load the data
+        response = self.client().get(f'/actors/{actor.id}',
+                                     headers=casting_assistant)
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -172,15 +176,14 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
 
     # POST Endpoint Tests
-    # -------------------------------------------------------------------------
+    # ---------------------------------------------
     # Creating a test for the /movies/create POST endpoint
     def test_post_movie(self):
         # Posting dummy movie data to movies POST endpoint
         res = self.client().post('/movies', headers=casting_executive_producer,
-                                    json={
-                                        'title': 'test posting new movie2',
-                                        'release_date': '01-10-2021',
-                                    })
+                                 json={'title': 'test posting new movie2',
+                                       'release_date': '01-10-2021',
+                                       })
         # Transforming body response into JSON
         data = json.loads(res.data)
         # Asserting that tests are valid
@@ -196,8 +199,8 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # get response json, then load the data
         response = self.client().post('/movies',
-                                    headers=casting_executive_producer,
-                                    json={})
+                                      headers=casting_executive_producer,
+                                      json={})
         data = json.loads(response.data)
         # status code should be 422
         self.assertEqual(response.status_code, 422)
@@ -209,12 +212,13 @@ class CapstoneTestCase(unittest.TestCase):
         tests posting new movie with a role below the minimum role
         '''
         # get response json, then load the data
-        response = self.client().post('/movies',
-                                    headers=casting_director,
-                                    json={
-                                        'title': 'test movie from unuathorized',
-                                        'release_date': '01-01-2022'
-                                    })
+        response = self.client().post(
+            '/movies',
+            headers=casting_director,
+            json={
+                'title': 'test movie from unuathorized',
+                'release_date': '01-01-2022'
+            })
         data = json.loads(response.data)
         # status code should be 401
         self.assertEqual(response.status_code, 401)
@@ -227,14 +231,15 @@ class CapstoneTestCase(unittest.TestCase):
         tests posting a new actor
         '''
         # get response json, then load the data
-        response = self.client().post('/actors',
-                                    headers=casting_director,
-                                    json={
-                                        'name': 'test posting artist from authorized',
-                                        'age': '42',
-                                        'gender': 'M',
-                                        'movie_id': 5
-                                    })
+        response = self.client().post(
+            '/actors',
+            headers=casting_director,
+            json={
+                'name': 'test posting artist from authorized',
+                'age': '42',
+                'gender': 'M',
+                'movie_id': 4
+            })
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -251,8 +256,8 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # get response json, then load the data
         response = self.client().post('/actors',
-                                    headers=casting_director,
-                                    json={})
+                                      headers=casting_director,
+                                      json={})
         data = json.loads(response.data)
         # status code should be 422
         self.assertEqual(response.status_code, 422)
@@ -264,14 +269,15 @@ class CapstoneTestCase(unittest.TestCase):
         tests posting new actor with a role below the minimum role
         '''
         # get response json, then load the data
-        response = self.client().post('/actors',
-                                    headers=casting_assistant,
-                                    json={
-                                        'name': 'test artist from unauthorized',
-                                        'age': '42',
-                                        'gender': 'M',
-                                        'movie_id': 5
-                                    })
+        response = self.client().post(
+            '/actors',
+            headers=casting_assistant,
+            json={
+                'name': 'test artist from unauthorized',
+                'age': '42',
+                'gender': 'M',
+                'movie_id': 5
+            })
         data = json.loads(response.data)
         # status code should be 401
         self.assertEqual(response.status_code, 401)
@@ -287,11 +293,14 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
-        response = self.client().patch(f'/movies/{movie.id}', headers=casting_director, 
-                                            json={
-                                                'title': 'updated movie name2'
-                                            })
+        # get response json, requesting the movie dynamically,
+        # then load the data
+        response = self.client().patch(
+            f'/movies/{movie.id}',
+            headers=casting_director,
+            json={
+                'title': 'updated movie name2'
+            })
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -308,9 +317,11 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
+        # get response json, requesting the movie dynamically,
+        # then load the data
         response = self.client().patch(
-            f'/movies/{movie.id}', headers=casting_assistant, json={
+            f'/movies/{movie.id}', headers=casting_assistant,
+            json={
                 'title': 'updated movie'
             })
         data = json.loads(response.data)
@@ -325,8 +336,13 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
-        response = self.client().patch(f'/movies/{movie.id}', headers=casting_director, json={})
+        # get response json, requesting the movie dynamically,
+        # then load the data
+        response = self.client().patch(
+            f'/movies/{movie.id}',
+            headers=casting_director,
+            json={}
+            )
         data = json.loads(response.data)
         # status code should be 422
         self.assertEqual(response.status_code, 422)
@@ -339,11 +355,14 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
-        response = self.client().patch(f'/actors/{actor.id}', headers=casting_director, 
-                                        json={
-                                            'name': 'updated actor name'
-                                        })
+        # get response json, requesting the actor dynamically,
+        # then load the data
+        response = self.client().patch(
+            f'/actors/{actor.id}',
+            headers=casting_director,
+            json={
+                'name': 'updated actor name'
+            })
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -360,11 +379,14 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
-        response = self.client().patch(f'/actors/{actor.id}', headers=casting_assistant, 
-                                        json={
-                                                'name': 'updated actor'
-                                            })
+        # get response json, requesting the actor dynamically,
+        # then load the data
+        response = self.client().patch(
+            f'/actors/{actor.id}',
+            headers=casting_assistant,
+            json={
+                'name': 'updated actor'
+            })
         data = json.loads(response.data)
         # status code should be 401
         self.assertEqual(response.status_code, 401)
@@ -377,27 +399,35 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
+        # get response json, requesting the actor dynamically,
+        # then load the data
         response = self.client().patch(
-            f'/actors/{actor.id}', headers=casting_director, json={})
+            f'/actors/{actor.id}',
+            headers=casting_director,
+            json={}
+            )
         data = json.loads(response.data)
         # status code should be 422
         self.assertEqual(response.status_code, 422)
         # success should be false
         self.assertFalse(data['success'])
 
-
     # DELETE Endpoint Tests
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------
     # Creating a test to delete a movie using the DELETE endpoint
+
     def test_delete_movie(self):
         '''
         tests deleting a movie
         '''
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
-        response = self.client().delete(f'/movies/{movie.id}', headers=casting_executive_producer)
+        # get response json, requesting the movie dynamically,
+        # then load the data
+        response = self.client().delete(
+            f'/movies/{movie.id}',
+            headers=casting_executive_producer
+            )
         data = json.loads(response.data)
         # status code should be 200
         self.assertEqual(response.status_code, 200)
@@ -412,7 +442,8 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random movie from db
         movie = Movie.query.order_by(func.random()).first()
-        # get response json, requesting the movie dynamically, then load the data
+        # get response json, requesting the movie dynamically,
+        # then load the data
         response = self.client().delete(
             f'/movies/{movie.id}', headers=casting_director)
         data = json.loads(response.data)
@@ -427,7 +458,8 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
+        # get response json, requesting the actor dynamically,
+        # then load the data
         response = self.client().delete(
             f'/actors/{actor.id}', headers=casting_executive_producer)
         data = json.loads(response.data)
@@ -444,7 +476,8 @@ class CapstoneTestCase(unittest.TestCase):
         '''
         # load a random actor from db
         actor = Actor.query.order_by(func.random()).first()
-        # get response json, requesting the actor dynamically, then load the data
+        # get response json, requesting the actor dynamically,
+        # then load the data
         response = self.client().delete(
             f'/actors/{actor.id}', headers=casting_assistant)
         data = json.loads(response.data)
@@ -452,7 +485,6 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         # success should be false
         self.assertFalse(data['success'])
-
 
 
 # Make the tests conveniently executable
