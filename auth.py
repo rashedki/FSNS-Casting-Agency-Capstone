@@ -1,10 +1,12 @@
 # Note: This file is pretty much a copy/paste from my Coffeeshop project
+import os
+from os import environ
 import json
 from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
-import os
+
 
 # Defining Autho0 information
 AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
@@ -46,7 +48,7 @@ def get_token_auth_header():
     header_parts = auth_header.split()
 
     # Checking if 'parts' info looks as we would expect it to
-    if len(header_parts)! = 2:
+    if len(header_parts)!=2:
         raise AuthError({
             'code': 'invalid_header',
             'description': 'Invalid Header.'
