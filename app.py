@@ -50,7 +50,7 @@ def create_app(test_config=None):
             abort(404)
         # Formatting the returned movie results
         movies = [movie.format() for movie in movies]
-        # # Formatting the actors field within movies
+        # Formatting the actors field within movies
         return jsonify({
             'success': True,
             'movies': movies
