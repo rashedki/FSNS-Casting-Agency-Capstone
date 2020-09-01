@@ -12,16 +12,15 @@ All dependencies are listed in the requirements.txt file. They can be installed 
 pip3 install -r requirements.txt
 ```
 
-After installing the dependencies, execute the bash file setup.sh to set the user jwts, auth0 credentials and the remote database url by naviging to the root directory of this project and running (Note: for now I just added the DATABASE_URL link:
+##### Running the server
+After installing the dependencies, execute the bash file (setup.sh) to set the user jwts, auth0 credentials and the remote database url by naviging to the root directory of this project and running
 ```sh
 source setup.sh
 ```
 
-##### Running the server
-
 From within the root directory first ensure you are working using your virtual environment.
 
-To run the server, execute:
+Then to run the server, execute:
 ```sh
 FLASK_APP=app.py
 FLASK_ENV=development
@@ -78,49 +77,195 @@ password: Tt@123456
 
 ### Endpoints:
 
-###### GET /movies
+###### GET '/movies'
 
-Gets all movies from the db.
+Gets all movies from db.
+
+Sample response:
+
+```sh
+{
+    "movies": [
+        {
+            "id": 1,
+            "release_date": "Wed, 01 Jan 2020 00:00:00 GMT",
+            "title": "test movie title 1"
+        },
+        {
+            "id": 2,
+            "release_date": "Thu, 02 Jan 2020 00:00:00 GMT",
+            "title": "test movie title 2"
+        },
+        {
+            "id": 3,
+            "release_date": "Fri, 03 Jan 2020 00:00:00 GMT",
+            "title": "test movie title 3"
+        },
+        {
+            "id": 4,
+            "release_date": "Sat, 04 Jan 2020 00:00:00 GMT",
+            "title": "test movie title 4"
+        }
+    ],
+    "success": true
+}
+```
 
 
-###### POST /movies
+###### POST '/movies'
 
 Adds a new movie to the db.
 
+Sample response:
+```sh
+{
+    "movie_id": 5,
+    "movies": [
+        {
+            "id": 5,
+            "release_date": "Tue, 05 Jan 2021 00:00:00 GMT",
+            "title": "test posting new movie 5"
+        }
+    ],
+    "success": true
+}
+```
 
-###### PATCH /movies/<int:movie_id>
 
-Edit data on a movie in the db.
+###### PATCH '/movies/<int:movie_id>'
+
+Edit data on a movie id# 5 in the db.
+
+Sample response:
+```sh
+{
+    "movies": [
+        {
+            "id": 5,
+            "release_date": "Tue, 05 Jan 2021 00:00:00 GMT",
+            "title": "updated movie name2"
+        }
+    ],
+    "success": true
+}
+```
 
 
-###### DELETE /movies/<int:movie_id>
+###### DELETE '/movies/<int:movie_id>'
 
-Delete a movie from the db.
+Delete a movie id#=5 from the db.
+
+Sample response:
+```sh
+{
+    "deleted": 5,
+    "success": true
+}
+```
 
 
-###### GET /actors
+###### GET '/actors'
 
-Gets all actors from the db.
+Gets all actors from db.
+```sh
+{
+    "actors": [
+        {
+            "age": 10,
+            "gender": "M",
+            "id": 1,
+            "movie_id": 1,
+            "name": "khalil"
+        },
+        {
+            "age": 20,
+            "gender": "F",
+            "id": 2,
+            "movie_id": 2,
+            "name": "actor2"
+        },
+        {
+            "age": 30,
+            "gender": "M",
+            "id": 3,
+            "movie_id": 3,
+            "name": "actor3"
+        },
+        {
+            "age": 40,
+            "gender": "F",
+            "id": 4,
+            "movie_id": 4,
+            "name": "actor4"
+        }
+    ],
+    "success": true
+}
+```
 
 
-###### POST /actors
+###### POST '/actors'
 
 Adds a new actor to the db.
 
+Sample response:
+```sh
+{
+    "actor_id": 5,
+    "actors": [
+        {
+            "age": 42,
+            "gender": "M",
+            "id": 5,
+            "movie_id": 4,
+            "name": "test posting artist from authorized"
+        }
+    ],
+    "success": true
+}
+```
 
-###### PATCH /actors/<int:actor_id>
 
-Edit data on a actor in the db.
+###### PATCH '/actors/<int:actor_id>'
+
+Edit data on an actor id#=5 in the db.
+
+Sample response:
+```sh
+{
+    "actors": [
+        {
+            "age": 42,
+            "gender": "M",
+            "id": 5,
+            "movie_id": 4,
+            "name": "updated actor name"
+        }
+    ],
+    "success": true
+```
 
 
-###### DELETE /actors/<int:actor_id>
+###### DELETE '/actors/<int:actor_id>'
 
-Delete a actor from the db.
+Delete a actor id#=5 from the db.
+
+Sample response:
+```sh
+{
+    "deleted": 5,
+    "success": true
+}
+```
 
 
 ### Tests
 
 To run the tests, run the follwoing script in your terminal:
 ```sh
+source setup.sh
+dropdb capstone_test
+createdb capstone_test
+psql capstone_test < capstone.psql
 python3 test_app.py
 ```

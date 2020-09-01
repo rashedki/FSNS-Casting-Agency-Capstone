@@ -12,33 +12,35 @@ from models import setup_db, Movie, Actor, db
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    CORS(app, resources = {r"/api/": {"origins": "*"}})
+    CORS(app, resources={r"/api/": {"origins": "*"}})
     setup_db(app)
 
     # CORS Headers
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,True')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE')
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type,Authorization,True')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PATCH,POST,DELETE')
         return response
 
     # Home greeting test
-        
     @app.route('/')
     def get_greeting():
         excited = os.environ.get('EXCITED')
-        greeting = "Hello" 
-        if excited == 'true': greeting = greeting + "!!!!!"
+        greeting = "Hello"
+        if excited == 'true':
+            greeting = greeting + "!!!!!"
         return greeting
 
     @app.route('/logout')
     def logout():
         message = 'You are loged out, Thank you for your visit'
-        return message       
+        return message
 
     # GET Endpoints
     # Creating an endpoint to view movie information
-    @app.route('/movies', methods = ['GET'])
+    @app.route('/movies', methods=['GET'])
     @requires_auth('get:movies')
     def get_movies(jwt):
         # Querying all the movies
@@ -48,14 +50,14 @@ def create_app(test_config=None):
             abort(404)
         # Formatting the returned movie results
         movies = [movie.format() for movie in movies]
-        # # Formatting the actors field within movies
+        # Formatting the actors field within movies
         return jsonify({
             'success': True,
             'movies': movies
         })
 
     # Creating endpoint to get a specific movie by provided movie_id
-    @app.route('/movies/<int:movie_id>', methods = ['GET'])
+    @app.route('/movies/<int:movie_id>', methods=['GET'])
     @requires_auth('get:movie-details')
     def details_movie(jwt, movie_id):
         # Querying movie by provided movie_id
@@ -68,11 +70,11 @@ def create_app(test_config=None):
                 'success': True,
                 'movie': movie
             })
-        # except:
+        # except Exception:
         #     abort(422)
 
     # Creating an endpoint to view actor information
-    @app.route('/actors', methods = ['GET'])
+    @app.route('/actors', methods=['GET'])
     @requires_auth('get:actors')
     def get_actors(jwt):
         # Querying all the actors
@@ -89,7 +91,7 @@ def create_app(test_config=None):
         })
 
     # Creating endpoint to get a specific actor by provided actor_id
-    @app.route('/actors/<int:actor_id>', methods = ['GET'])
+    @app.route('/actors/<int:actor_id>', methods=['GET'])
     @requires_auth('get:actor-details')
     def details_actor(jwt, actor_id):
         # Querying movie by provided actor_id
@@ -103,11 +105,11 @@ def create_app(test_config=None):
                 'success': True,
                 'actor': actor_id
             })
-        except:
+        except Exception:
             abort(422)
-    
+
     # Creating an endpoint to allow a new movie to be added
-    @app.route('/movies', methods = ['POST'])
+    @app.route('/movies', methods=['POST'])
     @requires_auth('post:movies')
     def add_movie(jwt):
         # Getting information from request body
@@ -120,7 +122,7 @@ def create_app(test_config=None):
             abort(422)
         try:
             # Adding new movie object with request body info
-            movie = Movie(title = movie_title, release_date=movie_release_date)
+            movie = Movie(title=movie_title, release_date=movie_release_date)
             movie.insert()
             # Returning success information
             return jsonify({
@@ -128,11 +130,11 @@ def create_app(test_config=None):
                 'movie_id': movie.id,
                 'movies': [movie.format()],
             })
-        except:
+        except Exception:
             abort(422)
 
     # Creating an endpoint to allow a new actor to be added
-    @app.route('/actors', methods = ['POST'])
+    @app.route('/actors', methods=['POST'])
     @requires_auth('post:actors')
     def add_actor(jwt):
         # Getting information from request body
@@ -143,14 +145,14 @@ def create_app(test_config=None):
         actor_gender = body.get('gender')
         actor_movie_id = body.get('movie_id')
         # Checking to see if proper info is present
-        if not 'name' in body:
+        if 'name' not in body:
             abort(422)
         try:
             # Adding new actor object with request body info
-            actor = Actor(name = actor_name,
-                            age = actor_age,
-                            gender = actor_gender,
-                            movie_id = actor_movie_id)
+            actor = Actor(name=actor_name,
+                          age=actor_age,
+                          gender=actor_gender,
+                          movie_id=actor_movie_id)
             actor.insert()
             # Returning success information
             return jsonify({
@@ -158,13 +160,13 @@ def create_app(test_config=None):
                 'actor_id': actor.id,
                 'actors': [actor.format()]
                 })
-        except:
+        except Exception:
             abort(422)
 
     # -------------------------------------------------------------------------
     # DELETE Endpoints
     # Creating endpoint to delete a movie by provided movie_id
-    @app.route('/movies/<int:movie_id>', methods = ['DELETE'])
+    @app.route('/movies/<int:movie_id>', methods=['DELETE'])
     @requires_auth('delete:movies')
     def delete_movie(jwt, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
@@ -182,7 +184,7 @@ def create_app(test_config=None):
                 abort(422)
 
     # Creating endpoint to delete an actor by provided actor_id
-    @app.route('/actors/<int:actor_id>', methods = ['DELETE'])
+    @app.route('/actors/<int:actor_id>', methods=['DELETE'])
     @requires_auth('delete:actors')
     def delete_actor(jwt, actor_id):
         # Querying actor by provided actor_id
@@ -197,13 +199,13 @@ def create_app(test_config=None):
                 'success': True,
                 'deleted': actor_id
             })
-        except:
+        except Exception:
             abort(422)
 
     # -------------------------------------------------------------------------
     # PATCH (Update) Endpoints
     # Creating an endpoint to update information about a specific movie
-    @app.route('/movies/<int:movie_id>', methods = ['PATCH'])
+    @app.route('/movies/<int:movie_id>', methods=['PATCH'])
     @requires_auth('patch:movies')
     def update_movie(jwt, movie_id):
         try:
@@ -212,7 +214,8 @@ def create_app(test_config=None):
                 abort(404)
             # get json from body
             body = request.get_json()
-            # Raise a 400 error if the title or release_date are not strings, or empty
+            # Raise a 400 error if the title or release_date are not strings,
+            # or empty
             if 'title' not in body and 'release_date' not in body:
                 abort(400)
             # update the title if it's available in the request body
@@ -237,14 +240,14 @@ def create_app(test_config=None):
                 'movies': [movie.format()]
             })
             # Raising exception if error updating movie
-        except:
+        except Exception:
             abort(422)
         # Raising exception if movie could not be found
         else:
             abort(404)
 
     # Creating an endpoint to update actor information with new attribute info
-    @app.route('/actors/<int:actor_id>', methods = ['PATCH'])
+    @app.route('/actors/<int:actor_id>', methods=['PATCH'])
     @requires_auth('patch:actors')
     def update_actors(jwt, actor_id):
         try:
@@ -253,8 +256,10 @@ def create_app(test_config=None):
                 abort(404)
             # get json from body
             body = request.get_json()
-            # Raise a 400 error if the name, age, and gender are not strings, or empty
-            if 'name' not in body and 'age' not in body and 'gender' not in body:
+            # Raise a 400 error if the name, age, and gender are not strings,
+            # or empty
+            if 'name' not in body and 'age' not in body and\
+                                      'gender' not in body:
                 abort(400)
             # update the age if it's available in the request body
             if 'name' in body:
@@ -286,7 +291,7 @@ def create_app(test_config=None):
                 'actors': [actor.format()]
             })
         # Raising exception if error updating actor
-        except:
+        except Exception:
             abort(422)
         # Raising exception if actor could not be found
         else:
@@ -300,7 +305,7 @@ def create_app(test_config=None):
     @app.errorhandler(500)
     def internal_server_error(error):
         return (jsonify({
-            'success': False, 
+            'success': False,
             'error': 500,
             'message': 'internal server error'
         }), 500)
@@ -308,7 +313,7 @@ def create_app(test_config=None):
     @app.errorhandler(400)
     def bad_request(error):
         return (jsonify({
-            'success': False, 
+            'success': False,
             'error': 400,
             'message': 'Bad Request'
         }), 400)
@@ -316,7 +321,7 @@ def create_app(test_config=None):
     @app.errorhandler(401)
     def unauthorized(error):
         return (jsonify({
-            'success': False, 
+            'success': False,
             'error': 401,
             'message': 'Unauthorized'
         }), 401)
@@ -332,7 +337,7 @@ def create_app(test_config=None):
     @app.errorhandler(405)
     def not_allowed(error):
         return (jsonify({
-            'success': False, 
+            'success': False,
             'error': 405,
             'message': 'method not allowed'
         }), 405)
@@ -354,6 +359,7 @@ def create_app(test_config=None):
         }), auth_error.status_code)
 
     return app
+
 
 # Creating the Flask application
 app = create_app()
